@@ -3,87 +3,159 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Will you be my Valentine?</title>
+  <title>Will you be my Valentine? 💘</title>
   <style>
-    :root { --card-w: min(92vw, 520px); }
+    :root { --card-w: min(92vw, 560px); }
+
+    * { box-sizing: border-box; }
+
     body{
-      margin:0; height:100vh; display:grid; place-items:center;
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       background: radial-gradient(circle at top, #ffe4ef, #fff);
       overflow:hidden;
+      padding: 28px 12px;
     }
+
     .card{
       width: var(--card-w);
-      background: rgba(255,255,255,0.85);
-      border: 1px solid rgba(255, 105, 180, 0.25);
-      box-shadow: 0 20px 60px rgba(255, 105, 180, 0.18);
+      background: rgba(255,255,255,0.88);
+      border: 1px solid rgba(255, 105, 180, 0.28);
+      box-shadow: 0 22px 70px rgba(255, 105, 180, 0.18);
       border-radius: 28px;
-      padding: 28px 26px 22px;
+      padding: 22px 22px 18px;
       text-align:center;
       backdrop-filter: blur(8px);
+      position: relative;
     }
-    h1{ margin: 8px 0 6px; font-size: 30px; }
-    p{ margin: 0 0 18px; color:#444; }
+
     .hearts{
-      font-size: 24px; letter-spacing: 4px;
-      margin-bottom: 10px;
+      font-size: 22px;
+      letter-spacing: 4px;
+      margin: 6px 0 10px;
     }
+
+    /* Photo */
+    .photo-wrap{
+      display:flex;
+      justify-content:center;
+      margin: 6px 0 14px;
+    }
+    .photo{
+      width: 170px;
+      height: 170px;
+      border-radius: 22px;
+      object-fit: cover;
+      box-shadow: 0 14px 40px rgba(0,0,0,0.14);
+      border: 3px solid rgba(255, 77, 141, 0.25);
+    }
+
+    h1{
+      margin: 6px 0 6px;
+      font-size: 30px;
+      line-height: 1.12;
+    }
+
+    p{
+      margin: 0 0 16px;
+      color:#444;
+      font-size: 16px;
+    }
+
     .btnrow{
-      display:flex; gap:12px; justify-content:center; align-items:center;
+      display:flex;
+      gap:12px;
+      justify-content:center;
+      align-items:center;
       margin-top: 10px;
+      flex-wrap: wrap;
     }
+
     button{
-      border:0; cursor:pointer;
+      border:0;
+      cursor:pointer;
       padding: 12px 18px;
       border-radius: 14px;
       font-size: 16px;
-      font-weight: 650;
+      font-weight: 700;
       transition: transform .08s ease;
       user-select:none;
       touch-action: manipulation;
+      white-space: nowrap;
     }
     button:active{ transform: scale(0.98); }
+
     #yes{
       background: linear-gradient(135deg, #ff4d8d, #ff8fb8);
       color:white;
-      box-shadow: 0 14px 30px rgba(255, 77, 141, 0.25);
+      box-shadow: 0 14px 30px rgba(255, 77, 141, 0.26);
     }
+
     #no{
-      background: #f2f2f2;
+      background: #f3f3f3;
       color:#333;
       border: 1px solid #e6e6e6;
-      position: fixed; /* allows it to move anywhere */
-      left: 50%;
-      top: 65%;
-      transform: translate(-50%, -50%);
+      position: relative; /* starts next to Yes */
     }
-    .note{ font-size: 13px; color:#666; margin-top: 14px; }
-    .confetti{
-      position: fixed; inset: 0; pointer-events:none;
-      display:none;
-    }
-    .toast{
+
+    .note{
+      font-size: 13px;
+      color:#666;
       margin-top: 14px;
-      font-weight: 650;
-      color:#ff2f7a;
+    }
+
+    /* Sweet message area (instead of alert) */
+    .message{
+      display:none;
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255, 77, 141, 0.10);
+      border: 1px solid rgba(255, 77, 141, 0.22);
+      color:#b0124e;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    /* Confetti canvas */
+    .confetti{
+      position: fixed;
+      inset: 0;
+      pointer-events:none;
       display:none;
     }
   </style>
 </head>
+
 <body>
   <div class="card">
     <div class="hearts">💗 💘 💗</div>
+
+    <!-- IMPORTANT:
+         Upload your photo file into the SAME GitHub repo as this index.html
+         and name it exactly: couple-dance.jpg
+         (or change the src below to match your filename) -->
+    <div class="photo-wrap">
+      <img class="photo" src="us.jpg" alt="Us dancing together" />
+    </div>
+
     <h1>Hey husband…</h1>
     <p>Will you be my Valentine? 🌹</p>
 
     <div class="btnrow">
       <button id="yes">Yes 💖</button>
-      <!-- No button is positioned fixed so it can dodge -->
       <button id="no" aria-label="No">No 🙈</button>
     </div>
 
-    <div class="toast" id="toast">YAYYY! 💞 Date night is happening! 🍓✨</div>
-    <div class="note">Tip: try clicking “No” 😉</div>
+    <div class="message" id="message">
+      YAYYY! 💞<br/>
+      You’re officially my Valentine — dinner + a dance with you sounds perfect. 🍓✨
+    </div>
+
+    <div class="note">Tip: try clicking “No” 😏</div>
   </div>
 
   <canvas class="confetti" id="confetti"></canvas>
@@ -91,46 +163,63 @@
   <script>
     const noBtn = document.getElementById('no');
     const yesBtn = document.getElementById('yes');
-    const toast = document.getElementById('toast');
+    const message = document.getElementById('message');
 
-    function placeNoRandomly() {
-      const pad = 14;
+    let attempts = 0;
+
+    function moveNoButton() {
+      attempts++;
+
+      // After first "threat", the button becomes free to run anywhere
+      noBtn.style.position = 'fixed';
+
+      const pad = Math.max(16, 26 - Math.min(attempts, 10)); // tighter pad as it gets "faster"
       const bw = noBtn.offsetWidth;
       const bh = noBtn.offsetHeight;
 
-      const maxX = window.innerWidth - bw - pad;
-      const maxY = window.innerHeight - bh - pad;
+      const maxX = Math.max(pad, window.innerWidth - bw - pad);
+      const maxY = Math.max(pad, window.innerHeight - bh - pad);
 
-      const x = Math.max(pad, Math.floor(Math.random() * maxX));
-      const y = Math.max(pad, Math.floor(Math.random() * maxY));
+      const x = Math.floor(Math.random() * maxX);
+      const y = Math.floor(Math.random() * maxY);
 
       noBtn.style.left = x + 'px';
       noBtn.style.top  = y + 'px';
-      noBtn.style.transform = 'none';
+
+      // "Faster every time": it may hop multiple times in quick succession
+      const extraHops = Math.min(3, Math.floor(attempts / 3)); // 0..3 extra hops
+      for (let i = 1; i <= extraHops; i++) {
+        const delay = Math.max(40, 220 - attempts * 18) + i * 40;
+        setTimeout(() => {
+          const xx = Math.floor(Math.random() * maxX);
+          const yy = Math.floor(Math.random() * maxY);
+          noBtn.style.left = xx + 'px';
+          noBtn.style.top  = yy + 'px';
+        }, delay);
+      }
     }
 
-    // Make "No" dodge cursor/touch
-    ['mouseenter','mouseover','pointerenter','touchstart','pointerdown'].forEach(evt => {
+    // Runs away on hover OR click attempt (and on touch)
+    ['mouseenter', 'mouseover', 'pointerdown', 'touchstart', 'pointerenter'].forEach(evt => {
       noBtn.addEventListener(evt, (e) => {
         e.preventDefault();
-        placeNoRandomly();
+        moveNoButton();
       }, { passive: false });
     });
 
-    // Keep it in-bounds on resize
-    window.addEventListener('resize', () => placeNoRandomly());
-
-    // Celebration on yes
+    // YES: show sweet message + confetti + hide NO
     yesBtn.addEventListener('click', () => {
-      toast.style.display = 'block';
+      message.style.display = 'block';
       noBtn.style.display = 'none';
       yesBtn.textContent = 'YES! 💘';
       startConfetti();
     });
 
-    // Tiny confetti (no libs)
+    // --- Confetti (no libraries) ---
     const canvas = document.getElementById('confetti');
     const ctx = canvas.getContext('2d');
+    let pieces = [];
+    let animId = null;
 
     function resizeCanvas(){
       canvas.width = window.innerWidth;
@@ -138,40 +227,51 @@
     }
     window.addEventListener('resize', resizeCanvas);
 
-    let pieces = [];
     function startConfetti(){
       resizeCanvas();
       canvas.style.display = 'block';
-      pieces = Array.from({length: 160}, () => ({
-        x: Math.random()*canvas.width,
-        y: -20 - Math.random()*canvas.height*0.3,
-        r: 3 + Math.random()*5,
-        vx: -2 + Math.random()*4,
-        vy: 2 + Math.random()*5,
-        rot: Math.random()*Math.PI,
-        vr: -0.2 + Math.random()*0.4
+
+      pieces = Array.from({length: 190}, () => ({
+        x: Math.random() * canvas.width,
+        y: -20 - Math.random() * canvas.height * 0.2,
+        r: 3 + Math.random() * 5,
+        vx: -2 + Math.random() * 4,
+        vy: 2 + Math.random() * 5,
+        rot: Math.random() * Math.PI,
+        vr: -0.2 + Math.random() * 0.4,
+        hue: 320 + Math.random() * 50
       }));
-      requestAnimationFrame(tick);
-      setTimeout(() => canvas.style.display = 'none', 2600);
+
+      if (animId) cancelAnimationFrame(animId);
+      animId = requestAnimationFrame(tick);
+
+      // Auto-hide after a moment
+      setTimeout(() => {
+        canvas.style.display = 'none';
+      }, 2800);
     }
 
     function tick(){
-      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
       for(const p of pieces){
-        p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.rot += p.vr;
+
         ctx.save();
-        ctx.translate(p.x,p.y);
+        ctx.translate(p.x, p.y);
         ctx.rotate(p.rot);
-        ctx.fillStyle = `hsl(${330 + Math.random()*40}, 90%, 65%)`;
-        ctx.fillRect(-p.r, -p.r, p.r*2, p.r*2);
+        ctx.fillStyle = `hsl(${p.hue}, 90%, 65%)`;
+        ctx.fillRect(-p.r, -p.r, p.r * 2, p.r * 2);
         ctx.restore();
       }
-      pieces = pieces.filter(p => p.y < canvas.height + 40);
-      if(pieces.length) requestAnimationFrame(tick);
-    }
 
-    // Initial position
-    placeNoRandomly();
+      pieces = pieces.filter(p => p.y < canvas.height + 40);
+      if (pieces.length) {
+        animId = requestAnimationFrame(tick);
+      }
+    }
   </script>
 </body>
 </html>
