@@ -92,6 +92,8 @@
       user-select:none;
       white-space: nowrap;
       transition: transform .12s ease, filter .12s ease;
+      position: relative;
+      overflow: hidden;
     }
     button:active{ transform: scale(0.97); }
 
@@ -100,8 +102,6 @@
       background:linear-gradient(135deg,#ff4d8d,#ff8fb8);
       color:white;
       box-shadow:0 14px 30px rgba(255,77,141,0.35);
-      position: relative;
-      overflow: hidden;
       animation: pulse 1.8s infinite;
     }
     @keyframes pulse{
@@ -147,6 +147,7 @@
       margin-top:14px;
       font-size:13px;
       color:#666;
+      min-height: 18px;
     }
 
     /* Kiss pop */
@@ -185,13 +186,13 @@
     <div class="heart" style="--x:85%;--s:24px;--o:.3;--d:13s;">💖</div>
   </div>
 
-  <div class="card" id="card">
+  <div class="card">
     <img src="us.jpg" class="photo" alt="Us dancing">
 
     <h1>Hey husband…</h1>
     <p>Will you be my Valentine? 🌹</p>
 
-    <div class="btnrow" id="btnrow">
+    <div class="btnrow">
       <button id="btnYes" class="btn-yes">Yes 💖</button>
       <button id="btnNo" class="btn-no">No 🙈</button>
     </div>
@@ -201,7 +202,7 @@
       You’re officially my Valentine — dinner & dancing forever 🍓✨
     </div>
 
-    <div class="note" id="note">Your move 😌💘</div>
+    <div class="note" id="note">Choose wisely 😌💘</div>
     <div class="kiss" id="kiss" aria-hidden="true">💋</div>
   </div>
 
@@ -214,21 +215,13 @@
     const note   = document.getElementById('note');
     const kiss   = document.getElementById('kiss');
 
-    // Only NO clicks do the prank. After 3 NO clicks, NO becomes YES.
-    // Confetti happens ONLY when a YES button is clicked.
     let noClicks = 0;
-    const noMax = 3;
+    const maxNoClicks = 3;
 
-    function setAsYes(btn){
-      btn.classList.remove('btn-no');
-      btn.classList.add('btn-yes');
-      btn.textContent = 'Yes 💖';
-    }
-
-    function setAsNo(btn){
-      btn.classList.remove('btn-yes');
-      btn.classList.add('btn-no');
-      btn.textContent = 'No 🙈';
+    function setNoToYes() {
+      btnNo.classList.remove('btn-no');
+      btnNo.classList.add('btn-yes');
+      btnNo.textContent = 'Yes 💖';
     }
 
     function doCelebration(){
@@ -241,14 +234,11 @@
       startConfetti();
     }
 
-    // YES: celebration immediately
-    btnYes.addEventListener('click', () => {
-      doCelebration();
-    });
+    // Confetti ONLY on clicking a YES button
+    btnYes.addEventListener('click', doCelebration);
 
-    // NO: swap labels/styles with YES for first 3 clicks, no confetti
     btnNo.addEventListener('click', () => {
-      // If NO already became YES, then it's just YES now
+      // If NO has already turned to YES, then clicking it should celebrate too
       if (btnNo.classList.contains('btn-yes')) {
         doCelebration();
         return;
@@ -256,19 +246,12 @@
 
       noClicks++;
 
-      if (noClicks < noMax) {
-        // swap appearance/text between buttons (meaning flips)
-        const yesIsYes = btnYes.classList.contains('btn-yes');
-
-        if (yesIsYes) { setAsNo(btnYes); setAsYes(btnNo); }
-        else          { setAsYes(btnYes); setAsNo(btnNo); }
-
-        note.textContent = `Hmm… not so fast 😏 (${noMax - noClicks} left)`;
+      if (noClicks < maxNoClicks) {
+        note.textContent = `No is not accepting that answer 🙃 (${maxNoClicks - noClicks} tries left)`;
       } else {
-        // After 3rd NO click, both become YES (but still no confetti until a YES click)
-        setAsYes(btnYes);
-        setAsYes(btnNo);
-        note.textContent = "Alright… both answers are YES now 😌💘";
+        // 3rd NO click: turn NO into YES, but still no confetti until he clicks YES
+        setNoToYes();
+        note.textContent = "🤣 Okayyy… 'No' just got upgraded to 'Yes'! Try again 💘";
       }
     });
 
