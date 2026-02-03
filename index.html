@@ -88,6 +88,7 @@
       justify-content:center;
       gap:14px;
       margin-top:10px;
+      flex-wrap: wrap;
     }
 
     button{
@@ -97,21 +98,42 @@
       font-size:16px;
       font-weight:700;
       cursor:pointer;
-      transition: transform .15s ease;
+      transition: transform .15s ease, filter .15s ease;
+      user-select: none;
+      white-space: nowrap;
     }
+    button:active{ transform: scale(0.97); }
 
+    /* Shiny YES button */
     #yes{
       background:linear-gradient(135deg,#ff4d8d,#ff8fb8);
       color:white;
       box-shadow:0 14px 30px rgba(255,77,141,0.35);
+      position: relative;
+      overflow: hidden;
       animation: pulse 1.8s infinite;
     }
-
     @keyframes pulse{
-      0%,100%{ transform:scale(1); }
-      50%{ transform:scale(1.04); }
+      0%,100%{ transform:translateY(0) scale(1); }
+      50%{ transform:translateY(-1px) scale(1.04); }
+    }
+    #yes::before{
+      content:"";
+      position:absolute;
+      inset:-40% -60%;
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.55) 45%, transparent 60%);
+      transform: rotate(20deg);
+      animation: shine 2.4s ease-in-out infinite;
+      pointer-events:none;
+    }
+    @keyframes shine{
+      0%   { transform: translateX(-40%) rotate(20deg); opacity: 0; }
+      15%  { opacity: 1; }
+      55%  { opacity: 1; }
+      100% { transform: translateX(40%) rotate(20deg); opacity: 0; }
     }
 
+    /* NO button */
     #no{
       background:#f3f3f3;
       border:1px solid #e3e3e3;
@@ -176,7 +198,7 @@
   </div>
 
   <div class="card" id="card">
-    <img src="us.jpg" class="photo" alt="Us dancing">
+    <img src="couple-dance.jpg" class="photo" alt="Us dancing">
 
     <h1>Hey husband…</h1>
     <p>Will you be my Valentine? 🌹</p>
@@ -191,7 +213,7 @@
       You’re officially my Valentine — dinner & dancing forever 🍓✨
     </div>
 
-    <div class="note">Try clicking “No” 😏</div>
+    <div class="note">Choose wisely 😌💘</div>
     <div class="kiss" id="kiss">💋</div>
   </div>
 
@@ -200,49 +222,66 @@
   <script>
     const yesBtn = document.getElementById('yes');
     const noBtn = document.getElementById('no');
-    const row = document.getElementById('btnrow');
     const msg = document.getElementById('message');
     const kiss = document.getElementById('kiss');
 
-    /* OPTION C: swap buttons */
+    // Every time NO is clicked, it becomes YES (and triggers the YES behavior)
     noBtn.addEventListener('click', () => {
-      row.insertBefore(noBtn, yesBtn);
+      // Make it look like a YES button every time
+      noBtn.textContent = "Yes 💖";
+      noBtn.style.background = "linear-gradient(135deg,#ff4d8d,#ff8fb8)";
+      noBtn.style.color = "white";
+      noBtn.style.border = "0";
+      noBtn.style.boxShadow = "0 14px 30px rgba(255,77,141,0.35)";
+      noBtn.style.filter = "saturate(1.05)";
+
+      // Trigger the YES celebration
+      doYesCelebration();
     });
 
     yesBtn.addEventListener('click', () => {
+      doYesCelebration();
+    });
+
+    function doYesCelebration(){
       msg.style.display = 'block';
       yesBtn.textContent = 'YES! 💘';
 
+      // Kiss pop
       kiss.classList.remove('show');
       void kiss.offsetWidth;
       kiss.classList.add('show');
 
       startConfetti();
-    });
+    }
 
     /* Confetti */
     const canvas = document.getElementById('confetti');
     const ctx = canvas.getContext('2d');
     let pieces=[];
+    let anim=null;
 
     function resize(){
       canvas.width=innerWidth;
       canvas.height=innerHeight;
     }
+    window.addEventListener('resize', resize);
 
     function startConfetti(){
       resize();
       canvas.style.display='block';
-      pieces=Array.from({length:180},()=>({
+      pieces=Array.from({length:200},()=>({
         x:Math.random()*canvas.width,
-        y:-20,
+        y:-20 - Math.random()*canvas.height*0.15,
         r:3+Math.random()*5,
         vx:-2+Math.random()*4,
         vy:2+Math.random()*5,
         rot:Math.random()*Math.PI,
-        vr:-0.2+Math.random()*0.4
+        vr:-0.2+Math.random()*0.4,
+        hue: 320 + Math.random()*50
       }));
-      requestAnimationFrame(tick);
+      if(anim) cancelAnimationFrame(anim);
+      anim=requestAnimationFrame(tick);
       setTimeout(()=>canvas.style.display='none',3000);
     }
 
@@ -255,12 +294,12 @@
         ctx.save();
         ctx.translate(p.x,p.y);
         ctx.rotate(p.rot);
-        ctx.fillStyle='hsl(330,90%,65%)';
+        ctx.fillStyle=`hsl(${p.hue},90%,65%)`;
         ctx.fillRect(-p.r,-p.r,p.r*2,p.r*2);
         ctx.restore();
       }
       pieces=pieces.filter(p=>p.y<canvas.height+40);
-      if(pieces.length) requestAnimationFrame(tick);
+      if(pieces.length) anim=requestAnimationFrame(tick);
     }
   </script>
 
