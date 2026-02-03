@@ -56,7 +56,6 @@
       z-index:2;
       animation: pop .5s ease;
     }
-
     @keyframes pop{
       from{ transform:translateY(10px) scale(.98); opacity:0; }
       to{ transform:none; opacity:1; }
@@ -72,17 +71,9 @@
       margin-bottom:14px;
     }
 
-    h1{
-      margin:6px 0;
-      font-size:30px;
-    }
+    h1{ margin:6px 0; font-size:30px; }
+    p{ margin:0 0 16px; color:#444; }
 
-    p{
-      margin:0 0 16px;
-      color:#444;
-    }
-
-    /* BUTTON ROW */
     .btnrow{
       display:flex;
       justify-content:center;
@@ -98,14 +89,14 @@
       font-size:16px;
       font-weight:700;
       cursor:pointer;
-      transition: transform .15s ease, filter .15s ease;
-      user-select: none;
+      user-select:none;
       white-space: nowrap;
+      transition: transform .12s ease, filter .12s ease;
     }
     button:active{ transform: scale(0.97); }
 
-    /* Shiny YES button */
-    #yes{
+    /* YES style (pink + shiny) */
+    .btn-yes{
       background:linear-gradient(135deg,#ff4d8d,#ff8fb8);
       color:white;
       box-shadow:0 14px 30px rgba(255,77,141,0.35);
@@ -117,7 +108,7 @@
       0%,100%{ transform:translateY(0) scale(1); }
       50%{ transform:translateY(-1px) scale(1.04); }
     }
-    #yes::before{
+    .btn-yes::before{
       content:"";
       position:absolute;
       inset:-40% -60%;
@@ -133,11 +124,12 @@
       100% { transform: translateX(40%) rotate(20deg); opacity: 0; }
     }
 
-    /* NO button */
-    #no{
+    /* NO style */
+    .btn-no{
       background:#f3f3f3;
       border:1px solid #e3e3e3;
       color:#333;
+      box-shadow: 0 10px 22px rgba(0,0,0,0.06);
     }
 
     .message{
@@ -167,9 +159,7 @@
       opacity:0;
       pointer-events:none;
     }
-    .kiss.show{
-      animation: kissPop 1s ease;
-    }
+    .kiss.show{ animation: kissPop 1s ease; }
     @keyframes kissPop{
       0%{ opacity:0; transform:translate(-50%,-50%) scale(.4); }
       30%{ opacity:1; transform:translate(-50%,-70%) scale(1.1); }
@@ -187,9 +177,7 @@
 </head>
 
 <body>
-
-  <!-- floating hearts -->
-  <div class="hearts">
+  <div class="hearts" aria-hidden="true">
     <div class="heart" style="--x:10%;--s:22px;--o:.5;--d:12s;">💗</div>
     <div class="heart" style="--x:25%;--s:18px;--o:.4;--d:10s;">💖</div>
     <div class="heart" style="--x:45%;--s:26px;--o:.3;--d:14s;">💘</div>
@@ -204,8 +192,8 @@
     <p>Will you be my Valentine? 🌹</p>
 
     <div class="btnrow" id="btnrow">
-      <button id="yes">Yes 💖</button>
-      <button id="no">No 🙈</button>
+      <button id="btnA" class="btn-yes">Yes 💖</button>
+      <button id="btnB" class="btn-no">No 🙈</button>
     </div>
 
     <div class="message" id="message">
@@ -213,39 +201,54 @@
       You’re officially my Valentine — dinner & dancing forever 🍓✨
     </div>
 
-    <div class="note">Choose wisely 😌💘</div>
-    <div class="kiss" id="kiss">💋</div>
+    <div class="note" id="note">Pick one… I dare you 😄</div>
+    <div class="kiss" id="kiss" aria-hidden="true">💋</div>
   </div>
 
   <canvas id="confetti"></canvas>
 
   <script>
-    const yesBtn = document.getElementById('yes');
-    const noBtn = document.getElementById('no');
-    const msg = document.getElementById('message');
+    const btnA = document.getElementById('btnA');
+    const btnB = document.getElementById('btnB');
+    const msg  = document.getElementById('message');
     const kiss = document.getElementById('kiss');
+    const note = document.getElementById('note');
 
-    // Every time NO is clicked, it becomes YES (and triggers the YES behavior)
-    noBtn.addEventListener('click', () => {
-      // Make it look like a YES button every time
-      noBtn.textContent = "Yes 💖";
-      noBtn.style.background = "linear-gradient(135deg,#ff4d8d,#ff8fb8)";
-      noBtn.style.color = "white";
-      noBtn.style.border = "0";
-      noBtn.style.boxShadow = "0 14px 30px rgba(255,77,141,0.35)";
-      noBtn.style.filter = "saturate(1.05)";
+    // We will "swap meanings" 3 times.
+    // After 3 clicks (on either button), BOTH become YES.
+    let swapsLeft = 3;
+    let celebrationDone = false;
 
-      // Trigger the YES celebration
-      doYesCelebration();
-    });
+    function setAsYes(btn){
+      btn.classList.remove('btn-no');
+      btn.classList.add('btn-yes');
+      btn.textContent = 'Yes 💖';
+    }
 
-    yesBtn.addEventListener('click', () => {
-      doYesCelebration();
-    });
+    function setAsNo(btn){
+      btn.classList.remove('btn-yes');
+      btn.classList.add('btn-no');
+      btn.textContent = 'No 🙈';
+    }
 
-    function doYesCelebration(){
+    function isYes(btn){
+      return btn.classList.contains('btn-yes');
+    }
+
+    function swapYesNo(){
+      // Swap styles + labels between the two buttons
+      const aWasYes = isYes(btnA);
+      const bWasYes = isYes(btnB);
+
+      if (aWasYes) setAsNo(btnA); else setAsYes(btnA);
+      if (bWasYes) setAsNo(btnB); else setAsYes(btnB);
+    }
+
+    function doCelebration(){
+      if (celebrationDone) return;
+      celebrationDone = true;
+
       msg.style.display = 'block';
-      yesBtn.textContent = 'YES! 💘';
 
       // Kiss pop
       kiss.classList.remove('show');
@@ -254,6 +257,29 @@
 
       startConfetti();
     }
+
+    function onAnyButtonClick(){
+      if (swapsLeft > 0){
+        swapsLeft--;
+        swapYesNo();
+
+        if (swapsLeft === 0){
+          // After 3 swaps, both become YES forever
+          setAsYes(btnA);
+          setAsYes(btnB);
+          note.textContent = "Okay okay… both answers are YES now 😌💘";
+        } else {
+          note.textContent = `Hmm… try again 😏 (${swapsLeft} left)`;
+        }
+        return;
+      }
+
+      // After swaps are done, clicking either YES triggers celebration
+      doCelebration();
+    }
+
+    btnA.addEventListener('click', onAnyButtonClick);
+    btnB.addEventListener('click', onAnyButtonClick);
 
     /* Confetti */
     const canvas = document.getElementById('confetti');
@@ -270,7 +296,7 @@
     function startConfetti(){
       resize();
       canvas.style.display='block';
-      pieces=Array.from({length:200},()=>({
+      pieces=Array.from({length:220},()=>({
         x:Math.random()*canvas.width,
         y:-20 - Math.random()*canvas.height*0.15,
         r:3+Math.random()*5,
@@ -302,6 +328,5 @@
       if(pieces.length) anim=requestAnimationFrame(tick);
     }
   </script>
-
 </body>
 </html>
