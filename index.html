@@ -186,14 +186,14 @@
   </div>
 
   <div class="card" id="card">
-    <img src="us.jpg" class="photo" alt="Us dancing">
+    <img src="couple-dance.jpg" class="photo" alt="Us dancing">
 
     <h1>Hey husband…</h1>
     <p>Will you be my Valentine? 🌹</p>
 
     <div class="btnrow" id="btnrow">
-      <button id="btnA" class="btn-yes">Yes 💖</button>
-      <button id="btnB" class="btn-no">No 🙈</button>
+      <button id="btnYes" class="btn-yes">Yes 💖</button>
+      <button id="btnNo" class="btn-no">No 🙈</button>
     </div>
 
     <div class="message" id="message">
@@ -201,23 +201,23 @@
       You’re officially my Valentine — dinner & dancing forever 🍓✨
     </div>
 
-    <div class="note" id="note">Pick one… I dare you 😄</div>
+    <div class="note" id="note">Your move 😌💘</div>
     <div class="kiss" id="kiss" aria-hidden="true">💋</div>
   </div>
 
   <canvas id="confetti"></canvas>
 
   <script>
-    const btnA = document.getElementById('btnA');
-    const btnB = document.getElementById('btnB');
-    const msg  = document.getElementById('message');
-    const kiss = document.getElementById('kiss');
-    const note = document.getElementById('note');
+    const btnYes = document.getElementById('btnYes');
+    const btnNo  = document.getElementById('btnNo');
+    const msg    = document.getElementById('message');
+    const note   = document.getElementById('note');
+    const kiss   = document.getElementById('kiss');
 
-    // We will "swap meanings" 3 times.
-    // After 3 clicks (on either button), BOTH become YES.
-    let swapsLeft = 3;
-    let celebrationDone = false;
+    // Only NO clicks do the prank. After 3 NO clicks, NO becomes YES.
+    // Confetti happens ONLY when a YES button is clicked.
+    let noClicks = 0;
+    const noMax = 3;
 
     function setAsYes(btn){
       btn.classList.remove('btn-no');
@@ -231,26 +231,9 @@
       btn.textContent = 'No 🙈';
     }
 
-    function isYes(btn){
-      return btn.classList.contains('btn-yes');
-    }
-
-    function swapYesNo(){
-      // Swap styles + labels between the two buttons
-      const aWasYes = isYes(btnA);
-      const bWasYes = isYes(btnB);
-
-      if (aWasYes) setAsNo(btnA); else setAsYes(btnA);
-      if (bWasYes) setAsNo(btnB); else setAsYes(btnB);
-    }
-
     function doCelebration(){
-      if (celebrationDone) return;
-      celebrationDone = true;
-
       msg.style.display = 'block';
 
-      // Kiss pop
       kiss.classList.remove('show');
       void kiss.offsetWidth;
       kiss.classList.add('show');
@@ -258,28 +241,36 @@
       startConfetti();
     }
 
-    function onAnyButtonClick(){
-      if (swapsLeft > 0){
-        swapsLeft--;
-        swapYesNo();
+    // YES: celebration immediately
+    btnYes.addEventListener('click', () => {
+      doCelebration();
+    });
 
-        if (swapsLeft === 0){
-          // After 3 swaps, both become YES forever
-          setAsYes(btnA);
-          setAsYes(btnB);
-          note.textContent = "Okay okay… both answers are YES now 😌💘";
-        } else {
-          note.textContent = `Hmm… try again 😏 (${swapsLeft} left)`;
-        }
+    // NO: swap labels/styles with YES for first 3 clicks, no confetti
+    btnNo.addEventListener('click', () => {
+      // If NO already became YES, then it's just YES now
+      if (btnNo.classList.contains('btn-yes')) {
+        doCelebration();
         return;
       }
 
-      // After swaps are done, clicking either YES triggers celebration
-      doCelebration();
-    }
+      noClicks++;
 
-    btnA.addEventListener('click', onAnyButtonClick);
-    btnB.addEventListener('click', onAnyButtonClick);
+      if (noClicks < noMax) {
+        // swap appearance/text between buttons (meaning flips)
+        const yesIsYes = btnYes.classList.contains('btn-yes');
+
+        if (yesIsYes) { setAsNo(btnYes); setAsYes(btnNo); }
+        else          { setAsYes(btnYes); setAsNo(btnNo); }
+
+        note.textContent = `Hmm… not so fast 😏 (${noMax - noClicks} left)`;
+      } else {
+        // After 3rd NO click, both become YES (but still no confetti until a YES click)
+        setAsYes(btnYes);
+        setAsYes(btnNo);
+        note.textContent = "Alright… both answers are YES now 😌💘";
+      }
+    });
 
     /* Confetti */
     const canvas = document.getElementById('confetti');
