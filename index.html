@@ -79,7 +79,6 @@
       justify-content:center;
       gap:14px;
       margin-top:10px;
-      flex-wrap: wrap;
     }
 
     button{
@@ -91,45 +90,20 @@
       cursor:pointer;
       user-select:none;
       white-space: nowrap;
-      transition: transform .12s ease, filter .12s ease;
-      position: relative;
-      overflow: hidden;
+      transition: transform .12s ease;
     }
     button:active{ transform: scale(0.97); }
 
-    /* YES style (pink + shiny) */
     .btn-yes{
       background:linear-gradient(135deg,#ff4d8d,#ff8fb8);
       color:white;
       box-shadow:0 14px 30px rgba(255,77,141,0.35);
-      animation: pulse 1.8s infinite;
-    }
-    @keyframes pulse{
-      0%,100%{ transform:translateY(0) scale(1); }
-      50%{ transform:translateY(-1px) scale(1.04); }
-    }
-    .btn-yes::before{
-      content:"";
-      position:absolute;
-      inset:-40% -60%;
-      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.55) 45%, transparent 60%);
-      transform: rotate(20deg);
-      animation: shine 2.4s ease-in-out infinite;
-      pointer-events:none;
-    }
-    @keyframes shine{
-      0%   { transform: translateX(-40%) rotate(20deg); opacity: 0; }
-      15%  { opacity: 1; }
-      55%  { opacity: 1; }
-      100% { transform: translateX(40%) rotate(20deg); opacity: 0; }
     }
 
-    /* NO style */
     .btn-no{
       background:#f3f3f3;
       border:1px solid #e3e3e3;
       color:#333;
-      box-shadow: 0 10px 22px rgba(0,0,0,0.06);
     }
 
     .message{
@@ -147,10 +121,9 @@
       margin-top:14px;
       font-size:13px;
       color:#666;
-      min-height: 18px;
+      min-height:18px;
     }
 
-    /* Kiss pop */
     .kiss{
       position:absolute;
       left:50%;
@@ -178,6 +151,7 @@
 </head>
 
 <body>
+
   <div class="hearts" aria-hidden="true">
     <div class="heart" style="--x:10%;--s:22px;--o:.5;--d:12s;">💗</div>
     <div class="heart" style="--x:25%;--s:18px;--o:.4;--d:10s;">💖</div>
@@ -192,9 +166,9 @@
     <h1>Hey husband…</h1>
     <p>Will you be my Valentine? 🌹</p>
 
-    <div class="btnrow">
+    <div class="btnrow" id="btnrow">
       <button id="btnYes" class="btn-yes">Yes 💖</button>
-      <button id="btnNo" class="btn-no">No 🙈</button>
+      <button id="btnNo"  class="btn-no">No 🙈</button>
     </div>
 
     <div class="message" id="message">
@@ -202,8 +176,8 @@
       You’re officially my Valentine — dinner & dancing forever 🍓✨
     </div>
 
-    <div class="note" id="note">Choose wisely 😌💘</div>
-    <div class="kiss" id="kiss" aria-hidden="true">💋</div>
+    <div class="note" id="note">Your move 😌💘</div>
+    <div class="kiss" id="kiss">💋</div>
   </div>
 
   <canvas id="confetti"></canvas>
@@ -211,20 +185,25 @@
   <script>
     const btnYes = document.getElementById('btnYes');
     const btnNo  = document.getElementById('btnNo');
+    const row    = document.getElementById('btnrow');
     const msg    = document.getElementById('message');
     const note   = document.getElementById('note');
     const kiss   = document.getElementById('kiss');
 
     let noClicks = 0;
-    const maxNoClicks = 3;
+    const MAX_NO = 3;
 
-    function setNoToYes() {
+    function swapButtons() {
+      row.insertBefore(row.children[1], row.children[0]);
+    }
+
+    function turnNoIntoYes() {
       btnNo.classList.remove('btn-no');
       btnNo.classList.add('btn-yes');
       btnNo.textContent = 'Yes 💖';
     }
 
-    function doCelebration(){
+    function celebrate() {
       msg.style.display = 'block';
 
       kiss.classList.remove('show');
@@ -234,32 +213,30 @@
       startConfetti();
     }
 
-    // Confetti ONLY on clicking a YES button
-    btnYes.addEventListener('click', doCelebration);
+    btnYes.addEventListener('click', celebrate);
 
     btnNo.addEventListener('click', () => {
-      // If NO has already turned to YES, then clicking it should celebrate too
+      // If NO already became YES, celebrate
       if (btnNo.classList.contains('btn-yes')) {
-        doCelebration();
+        celebrate();
         return;
       }
 
       noClicks++;
+      swapButtons();
 
-      if (noClicks < maxNoClicks) {
-        note.textContent = `No is not accepting that answer 🙃 (${maxNoClicks - noClicks} tries left)`;
+      if (noClicks < MAX_NO) {
+        note.textContent = `Nice try 😏 (${MAX_NO - noClicks} left)`;
       } else {
-        // 3rd NO click: turn NO into YES, but still no confetti until he clicks YES
-        setNoToYes();
-        note.textContent = "🤣 Okayyy… 'No' just got upgraded to 'Yes'! Try again 💘";
+        turnNoIntoYes();
+        note.textContent = "😂 Plot twist! 'No' got promoted to 'Yes' 💘";
       }
     });
 
     /* Confetti */
     const canvas = document.getElementById('confetti');
     const ctx = canvas.getContext('2d');
-    let pieces=[];
-    let anim=null;
+    let pieces=[], anim=null;
 
     function resize(){
       canvas.width=innerWidth;
@@ -272,13 +249,13 @@
       canvas.style.display='block';
       pieces=Array.from({length:220},()=>({
         x:Math.random()*canvas.width,
-        y:-20 - Math.random()*canvas.height*0.15,
+        y:-20,
         r:3+Math.random()*5,
         vx:-2+Math.random()*4,
         vy:2+Math.random()*5,
         rot:Math.random()*Math.PI,
         vr:-0.2+Math.random()*0.4,
-        hue: 320 + Math.random()*50
+        hue:320+Math.random()*50
       }));
       if(anim) cancelAnimationFrame(anim);
       anim=requestAnimationFrame(tick);
@@ -288,9 +265,7 @@
     function tick(){
       ctx.clearRect(0,0,canvas.width,canvas.height);
       for(const p of pieces){
-        p.x+=p.vx;
-        p.y+=p.vy;
-        p.rot+=p.vr;
+        p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr;
         ctx.save();
         ctx.translate(p.x,p.y);
         ctx.rotate(p.rot);
@@ -302,5 +277,6 @@
       if(pieces.length) anim=requestAnimationFrame(tick);
     }
   </script>
+
 </body>
 </html>
